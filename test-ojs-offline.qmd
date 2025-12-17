@@ -1,0 +1,171 @@
+---
+title: "OJS Offline Test Document"
+format:
+  html:
+    filters:
+      - ojs-offline
+---
+
+# Observable JS Offline Testing
+
+This document tests the OJS Offline extension with various Observable JS libraries.
+
+## Test 1: Basic D3
+
+```{ojs}
+d3 = require("d3@7")
+```
+
+```{ojs}
+html`<h4>D3 Version: ${d3.version}</h4>`
+```
+
+```{ojs}
+// Simple D3 array operations
+data = [5, 10, 15, 20, 25, 30]
+html`<p>Sum: ${d3.sum(data)}</p>`
+html`<p>Mean: ${d3.mean(data)}</p>`
+html`<p>Max: ${d3.max(data)}</p>`
+```
+
+## Test 2: D3 Visualization
+
+```{ojs}
+barChart = {
+  const width = 600;
+  const height = 300;
+  const margin = {top: 20, right: 20, bottom: 30, left: 40};
+
+  const data = [
+    {name: "A", value: 30},
+    {name: "B", value: 86},
+    {name: "C", value: 168},
+    {name: "D", value: 281},
+    {name: "E", value: 303}
+  ];
+
+  const x = d3.scaleBand()
+    .domain(data.map(d => d.name))
+    .range([margin.left, width - margin.right])
+    .padding(0.1);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.value)])
+    .nice()
+    .range([height - margin.bottom, margin.top]);
+
+  const svg = d3.create("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+  svg.selectAll("rect")
+    .data(data)
+    .join("rect")
+    .attr("x", d => x(d.name))
+    .attr("y", d => y(d.value))
+    .attr("width", x.bandwidth())
+    .attr("height", d => y(0) - y(d.value))
+    .attr("fill", "steelblue");
+
+  svg.append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x));
+
+  svg.append("g")
+    .attr("transform", `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y));
+
+  return svg.node();
+}
+```
+
+## Test 3: Observable Inputs
+
+```{ojs}
+Inputs = require("@observablehq/inputs")
+```
+
+```{ojs}
+viewof name = Inputs.text({label: "Name:", placeholder: "Enter your name"})
+viewof age = Inputs.range([0, 100], {label: "Age:", step: 1, value: 25})
+viewof color = Inputs.select(["red", "green", "blue"], {label: "Favorite color:"})
+```
+
+```{ojs}
+html`<div style="padding: 1em; background: #f0f0f0; border-radius: 5px;">
+  <h4>Your Info</h4>
+  <p><strong>Name:</strong> ${name || "Not provided"}</p>
+  <p><strong>Age:</strong> ${age}</p>
+  <p><strong>Color:</strong> <span style="color: ${color}">${color}</span></p>
+</div>`
+```
+
+## Test 4: HTL (Hypertext Literal)
+
+```{ojs}
+htl = require("htl")
+```
+
+```{ojs}
+htl.html`<div style="border: 2px solid #4CAF50; padding: 1em; border-radius: 8px;">
+  <h3 style="color: #4CAF50;">HTL Test</h3>
+  <p>This content is generated using the <code>htl</code> library.</p>
+  <p>Current time: ${new Date().toLocaleTimeString()}</p>
+</div>`
+```
+
+## Test 5: Observable Plot (if installed)
+
+```{ojs}
+//| eval: false
+// Uncomment after running setup.py
+// Plot = require("@observablehq/plot")
+//
+// plotData = d3.range(50).map(i => ({
+//   x: i,
+//   y: Math.sin(i / 5) * 100 + Math.random() * 20
+// }))
+//
+// Plot.plot({
+//   marks: [
+//     Plot.line(plotData, {x: "x", y: "y", stroke: "steelblue"}),
+//     Plot.dot(plotData, {x: "x", y: "y", fill: "steelblue"})
+//   ],
+//   width: 640,
+//   height: 300
+// })
+```
+
+## Test 6: Lodash Utilities
+
+```{ojs}
+_ = require("lodash")
+```
+
+```{ojs}
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+html`<div>
+  <p><strong>Chunk into groups of 3:</strong> ${JSON.stringify(_.chunk(numbers, 3))}</p>
+  <p><strong>Sum:</strong> ${_.sum(numbers)}</p>
+  <p><strong>Sample 3 random:</strong> ${_.sampleSize(numbers, 3).join(", ")}</p>
+</div>`
+```
+
+## Status Check
+
+```{ojs}
+html`<div style="background: #e8f5e9; padding: 1em; border-radius: 5px; margin-top: 2em;">
+  <h3 style="color: #2e7d32;">✓ Extension Status</h3>
+  <p>If you can see this and all tests above work, the OJS Offline extension is working correctly!</p>
+  <p><small>Check browser console (F12) for any errors or debug messages.</small></p>
+</div>`
+```
+
+---
+
+## Instructions
+
+1. Run `python3 _extensions/ojs-offline/setup.py` to download dependencies
+2. Render this document: `quarto render test-ojs-offline.qmd`
+3. Open the HTML file in a browser (can be offline)
+4. Verify all tests work without internet connection
