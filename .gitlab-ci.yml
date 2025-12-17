@@ -6,8 +6,8 @@ stages:
   - deploy
 
 variables:
-  # Use the official Quarto Docker image
-  QUARTO_IMAGE: "ghcr.io/quarto-dev/quarto-full:1.6.42"
+  # Use the uv Docker image for Python package management
+  UV_IMAGE: "ghcr.io/astral-sh/uv:latest"
 
 # Cache dependencies to speed up builds
 cache:
@@ -19,16 +19,16 @@ cache:
 # Build stage - compile the Quarto project
 build:
   stage: build
-  image: ${QUARTO_IMAGE}
+  image: ${UV_IMAGE}
   before_script:
+    - uv --version
     - quarto --version
   script:
-    - echo "Installing Python dependencies for OJS offline extension..."
-    - pip install --upgrade pip
-    - pip install requests  # Required for some download operations
+    - echo "Installing Python dependencies for OJS offline extension using uv..."
+    - uv pip install requests  # Required for some download operations
     
     - echo "Running OJS offline setup to download libraries..."
-    - cd _extensions/ojs-offline && python setup.py
+    - cd _extensions/ojs-offline && uv run python setup.py
     - cd ../../
     
     - echo "Building Quarto project..."
