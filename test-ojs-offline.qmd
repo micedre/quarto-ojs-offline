@@ -119,21 +119,21 @@ htl.html`<div style="border: 2px solid #4CAF50; padding: 1em; border-radius: 8px
 ```{ojs}
 //| eval: false
 // Uncomment after running setup.py
-// Plot = require("@observablehq/plot")
-//
-// plotData = d3.range(50).map(i => ({
-//   x: i,
-//   y: Math.sin(i / 5) * 100 + Math.random() * 20
-// }))
-//
-// Plot.plot({
-//   marks: [
-//     Plot.line(plotData, {x: "x", y: "y", stroke: "steelblue"}),
-//     Plot.dot(plotData, {x: "x", y: "y", fill: "steelblue"})
-//   ],
-//   width: 640,
-//   height: 300
-// })
+Plot = require("@observablehq/plot")
+
+plotData = d3.range(50).map(i => ({
+  x: i,
+  y: Math.sin(i / 5) * 100 + Math.random() * 20
+}))
+
+Plot.plot({
+  marks: [
+    Plot.line(plotData, {x: "x", y: "y", stroke: "steelblue"}),
+    Plot.dot(plotData, {x: "x", y: "y", fill: "steelblue"})
+  ],
+  width: 640,
+  height: 300
+})
 ```
 
 ## Test 6: Lodash Utilities

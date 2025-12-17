@@ -1,0 +1,71 @@
+# GitLab CI/CD configuration for publishing Quarto to GitLab Pages
+# This pipeline builds the Quarto project and publishes it to GitLab Pages
+
+stages:
+  - build
+  - deploy
+
+variables:
+  # Use the official Quarto Docker image
+  QUARTO_IMAGE: "ghcr.io/quarto-dev/quarto-full:1.6.42"
+
+# Cache dependencies to speed up builds
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .quarto/
+    - _extensions/ojs-offline/resources/
+
+# Build stage - compile the Quarto project
+build:
+  stage: build
+  image: ${QUARTO_IMAGE}
+  before_script:
+    - quarto --version
+  script:
+    - echo "Installing Python dependencies for OJS offline extension..."
+    - pip install --upgrade pip
+    - pip install requests  # Required for some download operations
+    
+    - echo "Running OJS offline setup to download libraries..."
+    - cd _extensions/ojs-offline && python setup.py
+    - cd ../../
+    
+    - echo "Building Quarto project..."
+    - quarto render --to html --output-dir public
+    
+    - echo "Build completed successfully!"
+  artifacts:
+    paths:
+      - public/
+    expire_in: 1 week
+  only:
+    - main
+
+# Deploy stage - publish to GitLab Pages
+pages:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploying to GitLab Pages..."
+    - mv public/ public-deploy/
+    - mkdir -p public
+    - mv public-deploy/* public/
+    - rm -rf public-deploy
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+  dependencies:
+    - build
+
+# Optional: Add a test job to verify the build
+# test:
+#   stage: test
+#   image: ${QUARTO_IMAGE}
+#   script:
+#     - echo "Running tests..."
+#     # Add your test commands here
+#   only:
+#     - main
