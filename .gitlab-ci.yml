@@ -9,7 +9,7 @@ stages:
 # Build stage - compile the Quarto project
 build:
   stage: build
-  image: ghcr.io/astral-sh/uv:0.9.18
+  image: proxy-ghcr-io.insee.fr/astral-sh/uv:latest
   script:
     - echo "Installing Python dependencies for OJS offline extension using uv..."
     - uv pip install requests  # Required for some download operations
