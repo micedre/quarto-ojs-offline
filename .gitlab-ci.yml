@@ -17,7 +17,7 @@ stages:
 
 pages:
   stage: deploy
-  image: proxy-ghcr-io.insee.fr/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
+  image: gitlab-registry.insee.fr/datascience/ls3/images/images-datascience-insee/onyxia-python-datascience:py3.11.10
   tags:
    - docker
   script:
@@ -29,7 +29,7 @@ pages:
     - cd ../../
     
     - echo "Building Quarto project..."
-    - uv run  --allow-insecure-host nexus.insee.fr --with quarto quarto --version    
+    - uv run  --allow-insecure-host nexus.insee.fr quarto --version    
     - echo "Build completed successfully!"
   artifacts:
     paths: 
