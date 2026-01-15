@@ -1,19 +1,21 @@
+variables:
+  UV_VERSION: "0.9.25"
+  PYTHON_VERSION: "3.12"
+  BASE_LAYER: bookworm-slim
+  # GitLab CI creates a separate mountpoint for the build directory,
+  # so we need to copy instead of using hard links.
+  UV_LINK_MODE: copy
+
 
 stages:
   - test-docker
   - deploy
 
-
-test-docker:
-  stage: test-docker
-  image: proxy-ghcr-io.insee.fr/quarto-dev/quarto-full:1.6.42
-  script:
-    - quarto --version
   
 
 pages:
   stage: deploy
-  image: proxy-ghcr-io.insee.fr/astral-sh/uv:0.9.18
+  image: proxy-ghcr-io.insee.fr/astral-sh/uv:$UV_VERSION-python$PYTHON_VERSION-$BASE_LAYER
   tags:
    - docker
   script:
