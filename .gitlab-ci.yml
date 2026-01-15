@@ -6,7 +6,9 @@ variables:
   # so we need to copy instead of using hard links.
   UV_LINK_MODE: copy
   UV_SYSTEM_PYTHON: 1
-
+  UV_DEFAULT_INDEX: "https://nexus.insee.fr/repository/pypi-public/simple"
+  UV_NATIVE_TLS: true
+  
 
 stages:
   - deploy
@@ -20,14 +22,14 @@ pages:
    - docker
   script:
     - echo "Installing Python dependencies for OJS offline extension using uv..."
-    - uv pip install requests  # Required for some download operations
+    - uv --allow-insecure-host nexus.insee.fr  pip install requests  # Required for some download operations
     
     - echo "Running OJS offline setup to download libraries..."
     - cd _extensions/ojs-offline && uv run python setup.py
     - cd ../../
     
     - echo "Building Quarto project..."
-    - uv run --with quarto quarto render --to html --output-dir public
+    - uv --allow-insecure-host nexus.insee.fr  run --with quarto quarto render --to html --output-dir public
     
     - echo "Build completed successfully!"
   artifacts:
