@@ -29,8 +29,7 @@ pages:
     - cd ../../
     
     - echo "Building Quarto project..."
-    - uv run --with quarto quarto render --to html --output-dir public
-    
+    - uv run  --allow-insecure-host nexus.insee.fr --with quarto quarto --version    
     - echo "Build completed successfully!"
   artifacts:
     paths: 
