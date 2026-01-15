@@ -5,10 +5,10 @@ variables:
   # GitLab CI creates a separate mountpoint for the build directory,
   # so we need to copy instead of using hard links.
   UV_LINK_MODE: copy
+  UV_SYSTEM_PYTHON: 1
 
 
 stages:
-  - test-docker
   - deploy
 
   
