@@ -29,7 +29,8 @@ pages:
     - cd ../../
     
     - echo "Building Quarto project..."
-    - uv run quarto --version    
+    - uv run quarto render --to html --output-dir public
+
     - echo "Build completed successfully!"
   artifacts:
     paths: 
