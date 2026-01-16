@@ -121,12 +121,12 @@ The extension bundles the following libraries:
 
 ## How It Works
 
-1. **Lua Filter** (`ojs-offline.lua`): Detects Observable JS code blocks and injects the offline resolver
-2. **JavaScript Resolver** (`ojs-offline-resolver.js`): Intercepts module loading and redirects to local files
+1. **Lua Filter** (`ojs-offline.lua`): Injects an inline interceptor script into the HTML `<head>`
+2. **Interceptor Script**: Overrides `window.fetch` and `document.createElement` to intercept CDN requests
 3. **Dependency Map** (`dependency-map.json`): Maps package identifiers to local file paths
 4. **Bundled Libraries** (`resources/libs/`): All JavaScript libraries stored locally
 
-The resolver loads **before** Quarto's OJS runtime, allowing it to intercept all module requests.
+The inline interceptor script loads **before** Quarto's OJS runtime module (which is deferred), allowing it to intercept all CDN requests for npm packages.
 
 ## Examples
 
@@ -216,16 +216,15 @@ If you see console errors about missing modules:
 3. Check that `resources/dependency-map.json` was generated
 4. Look for errors in browser console (press F12)
 
-### Enable debug logging
+### Check interceptor status
 
-Add this to your document to enable debug output:
+Open the browser console (F12) to see if the interceptor loaded:
 
-````markdown
-```{ojs}
-// Enable debug logging
-window.__quartoOjsOffline?.setDebug(true)
 ```
-````
+[OJS Offline] Interceptor loaded with 90 dependency mappings
+```
+
+If you don't see this message, the filter may not be applied correctly.
 
 ### Module not found
 
@@ -263,23 +262,24 @@ To update to newer versions:
 
 ### Script Loading Order
 
-The resolver must load before Quarto's OJS runtime. This is achieved by:
-- Using Quarto's HTML dependency system
-- Setting `type='module'` for proper timing
-- Hooking into the runtime before module loading begins
+The interceptor must load before Quarto's OJS runtime. This is achieved by:
+- Injecting an inline `<script>` tag in the HTML `<head>` using `quarto.doc.include_text("in-header", ...)`
+- Quarto's OJS runtime uses `type="module"` which is always deferred
+- Regular inline scripts execute immediately when parsed, before deferred modules
 
 ### Path Resolution
 
 Libraries are stored in:
 ```
-{document}_files/
-  libs/
-    ojs-offline-libs/
-      <package>@<version>/
-        <files>
+site_libs/
+  quarto-contrib/
+    ojs-offline-libs-1.0.0/
+      libs/
+        <package>@<version>/
+          <files>
 ```
 
-The resolver constructs relative paths from the HTML document to these resources.
+The dependency map is embedded in the inline script with paths pointing to these resources.
 
 ### Module Formats
 
