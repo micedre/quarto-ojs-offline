@@ -50,6 +50,155 @@ This will:
 
 The setup only needs to be run once (or when updating dependencies).
 
+### Using a Custom npm Registry Mirror
+
+For air-gapped environments or corporate networks, you can use a custom npm registry mirror instead of the default jsdelivr CDN.
+
+#### Option 1: Command-line argument
+
+```bash
+python3 setup.py --registry https://your-mirror.example.com/npm
+```
+
+#### Option 2: Environment variable
+
+```bash
+export NPM_REGISTRY=https://your-mirror.example.com/npm
+python3 setup.py
+```
+
+#### Option 3: Configuration file
+
+Create a file named `registry-config.json` in the extension directory:
+
+```json
+{
+  "registry": "https://your-mirror.example.com/npm",
+  "timeout": 60
+}
+```
+
+Then run:
+
+```bash
+python3 setup.py
+```
+
+Or specify a custom config file path:
+
+```bash
+python3 setup.py --config /path/to/my-config.json
+```
+
+#### Priority order
+
+The registry URL is resolved in this order (first match wins):
+1. `--registry` command-line argument
+2. `NPM_REGISTRY` environment variable
+3. `registry` key in config file
+4. Default: `https://cdn.jsdelivr.net/npm`
+
+#### Additional options
+
+```bash
+# Set download timeout (default: 30 seconds)
+python3 setup.py --timeout 60
+
+# Or via environment variable
+export NPM_TIMEOUT=60
+python3 setup.py
+```
+
+#### Mirror URL format
+
+Your mirror should serve packages in the same URL format as jsdelivr:
+```
+{registry}/{package}@{version}/{file-path}
+```
+
+For example:
+```
+https://your-mirror.example.com/npm/d3@7.8.5/dist/d3.min.js
+```
+
+### Adding Custom Libraries
+
+You can add additional JavaScript libraries beyond the built-in ones by declaring them in your `_quarto.yml` file.
+
+#### Basic usage
+
+Add an `ojs-offline` section to your `_quarto.yml`:
+
+```yaml
+project:
+  type: website
+
+ojs-offline:
+  libraries:
+    - name: "moment"
+      version: "2.29.4"
+      files:
+        - "min/moment.min.js"
+
+    - name: "@turf/turf"
+      version: "6.5.0"
+      files:
+        - "turf.min.js"
+```
+
+Then run setup.py to download the custom libraries:
+
+```bash
+cd _extensions/ojs-offline
+python3 setup.py
+```
+
+The script will automatically find and parse your `_quarto.yml`.
+
+#### Library configuration
+
+Each library entry requires:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | npm package name (e.g., `moment`, `@turf/turf`) |
+| `version` | Yes | Exact version number (e.g., `2.29.4`) |
+| `files` | Yes | List of files to download from the package |
+| `optional_files` | No | Optional files like source maps |
+
+#### Example with optional files
+
+```yaml
+ojs-offline:
+  libraries:
+    - name: "chart.js"
+      version: "4.4.1"
+      files:
+        - "dist/chart.umd.min.js"
+      optional_files:
+        - "dist/chart.umd.min.js.map"
+```
+
+#### Finding the right files
+
+To find which files to download for a package:
+
+1. Visit `https://cdn.jsdelivr.net/npm/{package}@{version}/`
+2. Browse the file listing to find the minified/dist files
+3. Common patterns:
+   - `dist/{name}.min.js`
+   - `build/{name}.min.js`
+   - `umd/{name}.min.js`
+
+#### Using custom libraries in OJS
+
+After downloading, use the library in your Observable JS code:
+
+```{ojs}
+moment = require("moment@2.29.4")
+moment().format('MMMM Do YYYY, h:mm:ss a')
+```
+
 ## Usage
 
 ### In a Quarto document
